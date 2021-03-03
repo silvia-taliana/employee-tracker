@@ -23,4 +23,47 @@ connection.connect((err) => {
 
 const start = () => {
     console.log("successfully started my function")
+    inquirer.prompt({
+        name: 'action',
+        type: 'rawlist',
+        message: 'What would you like to do?',
+        choices: [
+            'Add an employee',
+            'View all employees',
+            'Update an employee\'s role'
+        ]
+    }).then((answer) => {
+        switch (answer.action) {
+            case 'Add an employee':
+                addEmployee();
+                break;
+
+            case 'View all employees':
+                viewEmployees();
+                break;
+
+            case 'Update an employee\'s role':
+                updateEmployeeRole();
+                break;
+
+            default:
+                console.log(`Invalid action: ${answer.action}`);
+                break;
+        }
+    });
+};
+
+const addEmployee = () => {
+    console.log("Employee added!");
+    start();
+};
+
+const viewEmployees = () => {
+    console.log("Employees viewed!");
+    start();
+};
+
+const updateEmployeeRole = () => {
+    console.log("Employee role updated!");
+    start();
 };
