@@ -60,7 +60,14 @@ const addEmployee = () => {
 
 const viewEmployees = () => {
     console.log("Employees viewed!");
-    start();
+    let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name, employee.manager_id FROM ((role INNER JOIN employee ON role.id=employee.role_id) INNER JOIN department ON role.department_id=department.id);';
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+
+        console.table(res);
+
+        start();
+    });
 };
 
 const updateEmployeeRole = () => {
