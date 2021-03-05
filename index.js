@@ -54,8 +54,46 @@ const start = () => {
 };
 
 const addEmployee = () => {
-    console.log("Employee added!");
-    start();
+    inquirer
+        .prompt([
+            {
+                name: 'firstname',
+                type: 'input',
+                message: 'What is their first name?',
+            },
+            {
+                name: 'lastname',
+                type: 'input',
+                message: 'What is their last name?',
+            },
+            {
+                name: 'role',
+                type: 'list',
+                message: 'What is their role?',
+                choices: [
+                    '101',
+                    '102',
+                    '103'
+                ],
+            },
+            {
+                name: 'manager',
+                type: 'list',
+                message: 'Who is their manager?',
+                choices: [
+                    '1',
+                    '2',
+                    '3'
+                ],
+            }
+        ]).then((answer) => {
+            const query = 'INSERT INTO employee (id, first_name, last_name, role_id, manager_id) VALUES (5, ?, ?, ?, ?);';
+            connection.query(query, [answer.firstname, answer.lastname, answer.role, answer.manager], (err, res) => {
+                if (err) throw err;
+                console.log('Employee added');
+                start();
+            });
+        });
 };
 
 const viewEmployees = () => {
