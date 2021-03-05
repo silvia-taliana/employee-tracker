@@ -109,6 +109,35 @@ const viewEmployees = () => {
 };
 
 const updateEmployeeRole = () => {
-    console.log("Employee role updated!");
-    start();
+    inquirer.prompt([
+        {
+            name: 'chooseEmployee',
+            type: 'list',
+            message: 'Which employee would you like to update?',
+            choices: [
+                '1',
+                '2',
+                '3',
+                '4'
+            ],
+        },
+        {
+            name: 'newrole',
+            type: 'list',
+            message: 'Which new role would you like to assign to this employee?',
+            choices: [
+                '101',
+                '102',
+                '103',
+                '104'
+            ],
+        }
+    ]).then((answer) => {
+        const query = 'UPDATE employee SET role_id=? WHERE id=?;';
+        connection.query(query, [answer.newrole, answer.chooseEmployee], (err, res) => {
+            if (err) throw err;
+            console.log("Employee role updated!");
+            start();
+        });
+    });
 };
