@@ -60,7 +60,7 @@ const addEmployee = () => {
 
 const viewEmployees = () => {
     console.log("Employees viewed!");
-    let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name, employee.manager_id FROM ((role INNER JOIN employee ON role.id=employee.role_id) INNER JOIN department ON role.department_id=department.id);';
+    let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id LEFT JOIN employee AS manager ON employee.manager_id=manager.id;';
     connection.query(query, (err, res) => {
         if (err) throw err;
 
