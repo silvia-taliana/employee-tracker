@@ -32,6 +32,8 @@ const start = () => {
         message: 'What would you like to do?',
         choices: [
             'Add an employee',
+            'Add a role',
+            'Add a department',
             'View all employees',
             'View employees by department',
             'View employees by role',
@@ -42,6 +44,14 @@ const start = () => {
         switch (answer.action) {
             case 'Add an employee':
                 addEmployee();
+                break;
+
+            case 'Add a role':
+                addRole();
+                break;
+
+            case 'Add a department':
+                addDepartment();
                 break;
 
             case 'View all employees':
@@ -115,6 +125,30 @@ const addEmployee = () => {
         });
 };
 
+// function to add a role
+const addRole = () => {
+    inquirer
+        .prompt(
+            {
+                name: 'newRole',
+                type: 'input',
+                message: 'What role would you like to add?',
+            }
+        ).then((answer) => {
+            const query = 'INSERT INTO role (id, title) VALUES (107, ?);';
+            connection.query(query, [answer.newRole], (err, res) => {
+                if (err) throw err;
+                console.log('Role added');
+                start();
+            });
+        });
+};
+
+// function to add department
+const addDepartment = () => {
+    start();
+};
+
 // function to view all employees
 const viewEmployees = () => {
     console.log("Employees viewed!");
@@ -159,7 +193,7 @@ const viewEmpByDep = (choicesD) => {
     });
 };
 
-// selecting all departments in the database
+// selecting all roles in the database
 const getTitle = () => {
     let query = 'SELECT title FROM role;';
 
@@ -176,7 +210,7 @@ const getTitle = () => {
     });
 };
 
-// function to view employee by department
+// function to view employee by role
 const viewEmpByRole = (choicesT) => {
     inquirer.prompt({
         name: 'title',
