@@ -413,6 +413,7 @@ const viewEmpByMan = () => {
     // });
 };
 
+// The next few functions are for updating an employee's role
 // selecting all employees in the database
 const getEmployee = () => {
     let query = 'SELECT CONCAT(employee.first_name, " ", employee.last_name) AS employee FROM employee;';
@@ -451,11 +452,44 @@ const updateEmployeeRole = (choicesE, choicesR) => {
             choices: choicesR
         }
     ]).then((answer) => {
-        const query = 'UPDATE employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id LEFT JOIN employee AS manager ON employee.manager_id=manager.id SET role.title=? WHERE CONCAT(employee.first_name, " ", employee.last_name)=?;';
-        connection.query(query, [answer.newrole, answer.chooseEmployee], (err, res) => {
-            if (err) throw err;
-            console.log("Employee role updated!");
-            start();
-        });
+        getSalary(answer);
+    });
+};
+
+// Getting a salary for the chosen role 
+const getSalary = (answer) => {
+    let query = 'SELECT salary FROM role WHERE title=?;';
+
+    connection.query(query, [answer.newrole], (err, res) => {
+        if (err) throw err;
+        let newSalary = res.map(a => a.salary); // reading object values and saving in an array
+        let newR = answer.newrole;
+        getDep(answer, newSalary, newR);
+    });
+};
+
+// Getting the department for the chosen role
+const getDep = (answer, newSalary, newR) => {
+    let query = 'SELECT department_id FROM role WHERE title="' + newR + '";';
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        console.log(res);
+        let updDep = res.map(a => a.department_id); // reading object values and saving in an array
+        // Removing duplicate roles from the database
+        function removeDuplicates(data) {
+            return data.filter((value, index) => data.indexOf(value) === index);
+        }
+        updDep = removeDuplicates(updDep);
+        updateRole(answer, newSalary, updDep);
+    });
+};
+
+// Putting all the elements together to update role 
+const updateRole = (answer, newSalary, updDep) => {
+    const query = 'UPDATE employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id LEFT JOIN employee AS manager ON employee.manager_id=manager.id SET role.title=?, role.salary=' + newSalary + ', role.department_id=' + updDep + ' WHERE CONCAT(employee.first_name, " ", employee.last_name)=?;';
+    connection.query(query, [answer.newrole, answer.chooseEmployee], (err, res) => {
+        if (err) throw err;
+        console.log("Employee role updated!");
+        start();
     });
 };
