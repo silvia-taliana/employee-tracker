@@ -53,9 +53,7 @@ const start = () => {
                 break;
 
             case 'Update an employee\'s role':
-                // getEmployee();
-                updateEmployeeRole();
-                // getEmployee(updateEmployeeRole);
+                getEmployee();
                 break;
 
             default:
@@ -156,71 +154,26 @@ const viewEmpByMan = () => {
 };
 
 
-// const getEmployee = (other) => {
+const getEmployee = () => {
 
-//     let query = 'SELECT CONCAT(employee.first_name, " ", employee.last_name) AS employee FROM employee;';
-//     let choicesE = [];
+    let query = 'SELECT CONCAT(employee.first_name, " ", employee.last_name) AS employee FROM employee;';
+    // var choicesE;
 
-//     connection.query(query, (err, res) => {
-//         if (err) throw err;
-//         choices = res.map(a => a.employee);
-//         // console.log(choices);
-//         choicesE.push(choices);
-//         return choicesE;
-//     });
-//     other(choicesE);
-// };
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        // choices = res.map(a => a.employee);
+        let choicesE = res.map(a => a.employee);
+        updateEmployeeRole(choicesE);
+    });
+};
 
-
-
-// const getEmployee = () => {
-//     let total;
-//     let query = 'SELECT CONCAT(employee.first_name, " ", employee.last_name) AS employee FROM employee;';
-//     // let choicesE = [];
-//     connection.query(query, (err, res) => {
-//         if (err) throw err;
-//         // console.log(res);
-//         // choicesE = res;
-//         let total = res;
-//         // let total = choicesE.push(res);
-//         console.log(total);
-//         // console.log(choicesE);
-//         // return choicesE;
-//         return total;
-//     });
-//     updateEmployeeRole(total);
-// };
-
-const updateEmployeeRole = () => {
-
-    // console.log(choicesE);
-    // getEmployee(choicesE);
-    // let choicesE = [{ employee: 'Sarah' }, { employee: 'John' }];
-    // console.log(choicesE);
-    // let result = Array.prototype.map.call(choicesE, function (obj) {
-    //     return obj.value
-    // })
-    //Array.from(choicesE, mapFn);
-    //choicesE.map(a => a.employee);
-    // console.log(result);
-
-
-
-    // console.log(choicesE);
-
+const updateEmployeeRole = (choicesE) => {
     inquirer.prompt([
         {
             name: 'chooseEmployee',
             type: 'list',
             message: 'Which employee would you like to update?',
-            choices: //total.map(a => a.employee)
-                [
-                    '1',
-                    '2',
-                    '3',
-                    '4'
-                ]
-            ,
+            choices: choicesE,
         },
         {
             name: 'newrole',
