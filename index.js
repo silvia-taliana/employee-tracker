@@ -2,6 +2,7 @@ const inquirer = require('inquirer');
 const mysql = require('mysql');
 const cTable = require('console.table');
 
+// connecting to mysql
 const connection = mysql.createConnection({
     host: 'localhost',
 
@@ -16,11 +17,13 @@ const connection = mysql.createConnection({
     database: 'employees_db',
 });
 
+// determining if there are any connection errors, if not, starting the application
 connection.connect((err) => {
     if (err) throw err;
     start();
 });
 
+// starting menu
 const start = () => {
     console.log("successfully started my function")
     inquirer.prompt({
@@ -63,6 +66,7 @@ const start = () => {
     });
 };
 
+// function to add a new employee
 const addEmployee = () => {
     inquirer
         .prompt([
@@ -106,6 +110,7 @@ const addEmployee = () => {
         });
 };
 
+// function to view all employees
 const viewEmployees = () => {
     console.log("Employees viewed!");
     let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id LEFT JOIN employee AS manager ON employee.manager_id=manager.id;';
@@ -118,6 +123,7 @@ const viewEmployees = () => {
     });
 };
 
+// function to view employee by department
 const viewEmpByDep = () => {
     inquirer.prompt({
         name: 'department',
@@ -141,6 +147,7 @@ const viewEmpByDep = () => {
     });
 };
 
+// Function to view employee by manager
 const viewEmpByMan = () => {
     // console.log("Employees viewed by manager!");
     // let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id LEFT JOIN employee AS manager ON employee.manager_id=manager.id;';
@@ -153,20 +160,18 @@ const viewEmpByMan = () => {
     // });
 };
 
-
+// selecting all employees in the database
 const getEmployee = () => {
-
     let query = 'SELECT CONCAT(employee.first_name, " ", employee.last_name) AS employee FROM employee;';
-    // var choicesE;
 
     connection.query(query, (err, res) => {
         if (err) throw err;
-        // choices = res.map(a => a.employee);
-        let choicesE = res.map(a => a.employee);
+        let choicesE = res.map(a => a.employee); // reading object values and saving in an array
         updateEmployeeRole(choicesE);
     });
 };
 
+// allowing user to choose an employee and their updated role
 const updateEmployeeRole = (choicesE) => {
     inquirer.prompt([
         {
