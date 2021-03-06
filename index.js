@@ -53,7 +53,7 @@ const start = () => {
                 break;
 
             case 'Add a department':
-                addDepartment();
+                getDepId();
                 break;
 
             case 'View all roles':
@@ -201,8 +201,22 @@ const generateNewRole = (answer, depId, newRoleId) => {
     });
 };
 
+//Next two functions will generate a new department
+// getting the last existing department id and adding one 
+const getDepId = () => {
+    let query = 'SELECT id FROM department;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let newDepId = res.map(a => a.id); // reading object values and saving in an array
+        const lastItem = newDepId[newDepId.length - 1];
+        newDepId = lastItem + 1;
+        addDepartment(newDepId);
+    });
+};
+
 // function to add department
-const addDepartment = () => {
+const addDepartment = (newDepId) => {
     inquirer
         .prompt(
             {
@@ -211,7 +225,7 @@ const addDepartment = () => {
                 message: 'What department would you like to add?',
             }
         ).then((answer) => {
-            const query = 'INSERT INTO department (id, name) VALUES (207, ?);';
+            const query = 'INSERT INTO department (id, name) VALUES (' + newDepId + ', ?);';
             connection.query(query, [answer.newDepartment], (err, res) => {
                 if (err) throw err;
                 console.log('Department added');
