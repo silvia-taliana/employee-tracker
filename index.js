@@ -34,6 +34,8 @@ const start = () => {
             'Add an employee',
             'Add a role',
             'Add a department',
+            'View all roles',
+            'View all departments',
             'View all employees',
             'View employees by department',
             'View employees by role',
@@ -52,6 +54,14 @@ const start = () => {
 
             case 'Add a department':
                 addDepartment();
+                break;
+
+            case 'View all roles':
+                viewRoles();
+                break;
+
+            case 'View all departments':
+                viewDepartments();
                 break;
 
             case 'View all employees':
@@ -161,6 +171,32 @@ const addDepartment = () => {
                 start();
             });
         });
+};
+
+// function to view all roles
+const viewRoles = () => {
+    console.log("Roles viewed!");
+    let query = 'SELECT title AS Title FROM role;';
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+
+        console.table(res);
+
+        start();
+    });
+};
+
+// function to view all departments
+const viewDepartments = () => {
+    console.log("Departments viewed!");
+    let query = 'SELECT name AS Department FROM department;';
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+
+        console.table(res);
+
+        start();
+    });
 };
 
 // function to view all employees
