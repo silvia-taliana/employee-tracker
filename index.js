@@ -34,6 +34,7 @@ const start = () => {
             'Add an employee',
             'View all employees',
             'View employees by department',
+            'View employees by role',
             'View employees by manager',
             'Update an employee\'s role'
         ]
@@ -49,6 +50,10 @@ const start = () => {
 
             case 'View employees by department':
                 getDepartment();
+                break;
+
+            case 'View employees by role':
+                getTitle();
                 break;
 
             case 'View employees by manager':
@@ -154,6 +159,43 @@ const viewEmpByDep = (choicesD) => {
     });
 };
 
+// selecting all departments in the database
+const getTitle = () => {
+    let query = 'SELECT title FROM role;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let choicesT = res.map(a => a.title); // reading object values and saving in an array
+
+        // Removing duplicate roles from the database
+        function removeDuplicates(data) {
+            return data.filter((value, index) => data.indexOf(value) === index);
+        }
+        choicesT = removeDuplicates(choicesT);
+        viewEmpByRole(choicesT);
+    });
+};
+
+// function to view employee by department
+const viewEmpByRole = (choicesT) => {
+    inquirer.prompt({
+        name: 'title',
+        type: 'list',
+        message: 'Please choose a role',
+        choices: choicesT
+    }).then((answer) => {
+        console.log("Employees viewed by role!");
+        let query = 'SELECT employee.id AS ID, CONCAT(employee.first_name, " ", employee.last_name) AS Employee FROM employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id WHERE role.title=?;';
+        connection.query(query, [answer.title], (err, res) => {
+            if (err) throw err;
+
+            console.table(res);
+
+            start();
+        });
+    });
+};
+
 // Function to view employee by manager
 const viewEmpByMan = () => {
     // console.log("Employees viewed by manager!");
@@ -178,6 +220,7 @@ const getEmployee = () => {
     });
 };
 
+// selecting all roles from the database
 const getRoles = (choicesE) => {
     let query = 'SELECT title FROM role;';
 
@@ -202,12 +245,6 @@ const updateEmployeeRole = (choicesE, choicesR) => {
             type: 'list',
             message: 'Which new role would you like to assign to this employee?',
             choices: choicesR
-            // [
-            //     '101',
-            //     '102',
-            //     '103',
-            //     '104'
-            // ],
         }
     ]).then((answer) => {
         const query = 'UPDATE employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id LEFT JOIN employee AS manager ON employee.manager_id=manager.id SET role.title=? WHERE CONCAT(employee.first_name, " ", employee.last_name)=?;';
