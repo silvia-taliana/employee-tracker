@@ -113,7 +113,7 @@ const addEmployee = () => {
 // function to view all employees
 const viewEmployees = () => {
     console.log("Employees viewed!");
-    let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id LEFT JOIN employee AS manager ON employee.manager_id=manager.id;';
+    let query = 'SELECT employee.id AS ID, employee.first_name AS "First Name", employee.last_name AS "Last Name", role.title AS Tilte, role.salary AS Salary, department.name AS Department, CONCAT(manager.first_name, " ", manager.last_name) AS Manager FROM employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id LEFT JOIN employee AS manager ON employee.manager_id=manager.id;';
     connection.query(query, (err, res) => {
         if (err) throw err;
 
@@ -143,7 +143,7 @@ const viewEmpByDep = (choicesD) => {
         choices: choicesD
     }).then((answer) => {
         console.log("Employees viewed by department!");
-        let query = 'SELECT employee.id, CONCAT(employee.first_name, " ", employee.last_name) AS employee, role.title FROM employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id WHERE department.name=?;';
+        let query = 'SELECT employee.id AS ID, CONCAT(employee.first_name, " ", employee.last_name) AS Employee, role.title AS Title FROM employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id WHERE department.name=?;';
         connection.query(query, [answer.department], (err, res) => {
             if (err) throw err;
 
@@ -174,12 +174,22 @@ const getEmployee = () => {
     connection.query(query, (err, res) => {
         if (err) throw err;
         let choicesE = res.map(a => a.employee); // reading object values and saving in an array
-        updateEmployeeRole(choicesE);
+        getRoles(choicesE);
+    });
+};
+
+const getRoles = (choicesE) => {
+    let query = 'SELECT title FROM role;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let choicesR = res.map(a => a.title); // reading object values and saving in an array
+        updateEmployeeRole(choicesE, choicesR);
     });
 };
 
 // allowing user to choose an employee and their updated role
-const updateEmployeeRole = (choicesE) => {
+const updateEmployeeRole = (choicesE, choicesR) => {
     inquirer.prompt([
         {
             name: 'chooseEmployee',
@@ -191,15 +201,16 @@ const updateEmployeeRole = (choicesE) => {
             name: 'newrole',
             type: 'list',
             message: 'Which new role would you like to assign to this employee?',
-            choices: [
-                '101',
-                '102',
-                '103',
-                '104'
-            ],
+            choices: choicesR
+            // [
+            //     '101',
+            //     '102',
+            //     '103',
+            //     '104'
+            // ],
         }
     ]).then((answer) => {
-        const query = 'UPDATE employee SET role_id=? WHERE id=?;';
+        const query = 'UPDATE employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id LEFT JOIN employee AS manager ON employee.manager_id=manager.id SET role.title=? WHERE CONCAT(employee.first_name, " ", employee.last_name)=?;';
         connection.query(query, [answer.newrole, answer.chooseEmployee], (err, res) => {
             if (err) throw err;
             console.log("Employee role updated!");
