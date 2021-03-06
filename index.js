@@ -49,7 +49,7 @@ const start = () => {
                 break;
 
             case 'Add a role':
-                getRoleId();
+                getNewDepartment();
                 break;
 
             case 'Add a department':
@@ -135,8 +135,51 @@ const addEmployee = () => {
         });
 };
 
-// getting the role id and adding one 
-const getRoleId = () => {
+// next few functions will add a role
+// selecting all departments in the database
+const getNewDepartment = () => {
+    let query = 'SELECT name FROM department;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let choicesD = res.map(a => a.name); // reading object values and saving in an array
+        addRole(choicesD);
+    });
+};
+
+// function to inquirer about new role
+const addRole = (choicesD) => {
+    inquirer
+        .prompt([
+            {
+                name: 'newRole',
+                type: 'input',
+                message: 'What role would you like to add?',
+            },
+            {
+                name: 'salary',
+                type: 'input',
+                message: 'What is the yearly salary for this role?'
+            },
+            {
+                name: 'department',
+                type: 'list',
+                message: 'Which department does this role belong to?',
+                choices: choicesD
+            }
+        ]
+        ).then((answer) => {
+            const query = 'SELECT id FROM department WHERE department.name=?;';
+            connection.query(query, [answer.department], (err, res) => {
+                if (err) throw err;
+                let depId = res.map(a => a.id);
+                getRoleId(answer, depId)
+            });
+        });
+};
+
+// getting the last existing role id and adding one 
+const getRoleId = (answer, depId) => {
     let query = 'SELECT id FROM role;';
 
     connection.query(query, (err, res) => {
@@ -144,28 +187,18 @@ const getRoleId = () => {
         let newRoleId = res.map(a => a.id); // reading object values and saving in an array
         const lastItem = newRoleId[newRoleId.length - 1];
         newRoleId = lastItem + 1;
-        console.log(newRoleId);
-        addRole(newRoleId);
+        generateNewRole(answer, depId, newRoleId);
     });
 };
 
-// function to add a role
-const addRole = (newRoleId) => {
-    inquirer
-        .prompt(
-            {
-                name: 'newRole',
-                type: 'input',
-                message: 'What role would you like to add?',
-            }
-        ).then((answer) => {
-            const query = 'INSERT INTO role (id, title) VALUES (' + newRoleId + ', ?);';
-            connection.query(query, [answer.newRole], (err, res) => {
-                if (err) throw err;
-                console.log('Role added');
-                start();
-            });
-        });
+// putting all these elements together to get a new role with matching salary and department
+const generateNewRole = (answer, depId, newRoleId) => {
+    const query = 'INSERT INTO role (id, title, salary, department_id) VALUES (' + newRoleId + ', ?, ?, ' + depId + ');';
+    connection.query(query, [answer.newRole, answer.salary], (err, res) => {
+        if (err) throw err;
+        console.log('Role added');
+        start();
+    });
 };
 
 // function to add department
