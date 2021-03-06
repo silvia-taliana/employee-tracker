@@ -48,7 +48,7 @@ const start = () => {
                 break;
 
             case 'View employees by department':
-                viewEmpByDep();
+                getDepartment();
                 break;
 
             case 'View employees by manager':
@@ -123,17 +123,24 @@ const viewEmployees = () => {
     });
 };
 
+// selecting all departments in the database
+const getDepartment = () => {
+    let query = 'SELECT name FROM department;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let choicesD = res.map(a => a.name); // reading object values and saving in an array
+        viewEmpByDep(choicesD);
+    });
+};
+
 // function to view employee by department
-const viewEmpByDep = () => {
+const viewEmpByDep = (choicesD) => {
     inquirer.prompt({
         name: 'department',
         type: 'list',
         message: 'Please choose a department',
-        choices: [
-            'Engineering',
-            'Human Resources',
-            'Management Team'
-        ]
+        choices: choicesD
     }).then((answer) => {
         console.log("Employees viewed by department!");
         let query = 'SELECT employee.id, CONCAT(employee.first_name, " ", employee.last_name) AS employee, role.title FROM employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id WHERE department.name=?;';
