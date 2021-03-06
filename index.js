@@ -45,7 +45,7 @@ const start = () => {
     }).then((answer) => {
         switch (answer.action) {
             case 'Add an employee':
-                addEmployee();
+                getNewTitle();
                 break;
 
             case 'Add a role':
@@ -91,8 +91,37 @@ const start = () => {
     });
 };
 
+// The next few functions will add a new employee
+// selecting all roles in the database
+const getNewTitle = () => {
+    let query = 'SELECT title FROM role;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let choicesT = res.map(a => a.title); // reading object values and saving in an array
+
+        // Removing duplicate roles from the database
+        function removeDuplicates(data) {
+            return data.filter((value, index) => data.indexOf(value) === index);
+        }
+        choicesT = removeDuplicates(choicesT);
+        getNewMan(choicesT);
+    });
+};
+
+// selecting all employees in the database for management assignment
+const getNewMan = (choicesT) => {
+    let query = 'SELECT CONCAT(first_name, " ", last_name) AS Manager FROM employee;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let choicesM = res.map(a => a.Manager); // reading object values and saving in an array
+        addEmployee(choicesT, choicesM);
+    });
+};
+
 // function to add a new employee
-const addEmployee = () => {
+const addEmployee = (choicesT, choicesM) => {
     inquirer
         .prompt([
             {
@@ -109,30 +138,60 @@ const addEmployee = () => {
                 name: 'role',
                 type: 'list',
                 message: 'What is their role?',
-                choices: [
-                    '101',
-                    '102',
-                    '103'
-                ],
+                choices: choicesT
             },
             {
                 name: 'manager',
                 type: 'list',
                 message: 'Who is their manager?',
-                choices: [
-                    '1',
-                    '2',
-                    '3'
-                ],
+                choices: choicesM
             }
         ]).then((answer) => {
-            const query = 'INSERT INTO employee (id, first_name, last_name, role_id, manager_id) VALUES (5, ?, ?, ?, ?);';
-            connection.query(query, [answer.firstname, answer.lastname, answer.role, answer.manager], (err, res) => {
-                if (err) throw err;
-                console.log('Employee added');
-                start();
-            });
+            getNewId(answer);
         });
+};
+
+// Getting the new employee ID 
+const getNewId = (answer) => {
+    let query = 'SELECT id FROM employee;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let newId = res.map(a => a.id); // reading object values and saving in an array
+        const lastItem = newId[newId.length - 1];
+        newId = lastItem + 1;
+        getNewRoleId(answer, newId);
+    });
+};
+
+// Geting the new role ID
+const getNewRoleId = (answer, newId) => {
+    const query = 'SELECT id FROM role WHERE role.title=?;';
+    connection.query(query, [answer.role], (err, res) => {
+        if (err) throw err;
+        let roleId = res.map(a => a.id);
+        getManId(answer, newId, roleId)
+    });
+};
+
+// Getting the new manager ID
+const getManId = (answer, newId, roleId) => {
+    const query = 'SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id FROM employee LEFT JOIN employee AS manager ON employee.manager_id=manager.id WHERE CONCAT(employee.first_name, " ", employee.last_name)  = ?;';
+    connection.query(query, [answer.manager], (err, res) => {
+        if (err) throw err;
+        let managerId = res.map(a => a.id);
+        generateNewEmployee(answer, newId, roleId, managerId)
+    });
+};
+
+// Putting all the elements together to generate a new employee
+const generateNewEmployee = (answer, newId, roleId, managerId) => {
+    const query = 'INSERT INTO employee (id, first_name, last_name, role_id, manager_id) VALUES (' + newId + ', ?, ?, ' + roleId + ', ' + managerId + ');';
+    connection.query(query, [answer.firstname, answer.lastname], (err, res) => {
+        if (err) throw err;
+        console.log('Employee added');
+        start();
+    });
 };
 
 // next few functions will add a role
