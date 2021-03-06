@@ -49,7 +49,7 @@ const start = () => {
                 break;
 
             case 'Add a role':
-                addRole();
+                getRoleId();
                 break;
 
             case 'Add a department':
@@ -135,8 +135,22 @@ const addEmployee = () => {
         });
 };
 
+// getting the role id and adding one 
+const getRoleId = () => {
+    let query = 'SELECT id FROM role;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let newRoleId = res.map(a => a.id); // reading object values and saving in an array
+        const lastItem = newRoleId[newRoleId.length - 1];
+        newRoleId = lastItem + 1;
+        console.log(newRoleId);
+        addRole(newRoleId);
+    });
+};
+
 // function to add a role
-const addRole = () => {
+const addRole = (newRoleId) => {
     inquirer
         .prompt(
             {
@@ -145,7 +159,7 @@ const addRole = () => {
                 message: 'What role would you like to add?',
             }
         ).then((answer) => {
-            const query = 'INSERT INTO role (id, title) VALUES (107, ?);';
+            const query = 'INSERT INTO role (id, title) VALUES (' + newRoleId + ', ?);';
             connection.query(query, [answer.newRole], (err, res) => {
                 if (err) throw err;
                 console.log('Role added');
