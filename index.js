@@ -146,7 +146,21 @@ const addRole = () => {
 
 // function to add department
 const addDepartment = () => {
-    start();
+    inquirer
+        .prompt(
+            {
+                name: 'newDepartment',
+                type: 'input',
+                message: 'What department would you like to add?',
+            }
+        ).then((answer) => {
+            const query = 'INSERT INTO department (id, name) VALUES (207, ?);';
+            connection.query(query, [answer.newDepartment], (err, res) => {
+                if (err) throw err;
+                console.log('Department added');
+                start();
+            });
+        });
 };
 
 // function to view all employees
