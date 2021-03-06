@@ -30,6 +30,8 @@ const start = () => {
         choices: [
             'Add an employee',
             'View all employees',
+            'View employees by department',
+            'View employees by manager',
             'Update an employee\'s role'
         ]
     }).then((answer) => {
@@ -42,8 +44,18 @@ const start = () => {
                 viewEmployees();
                 break;
 
+            case 'View employees by department':
+                viewEmpByDep();
+                break;
+
+            case 'View employees by manager':
+                viewEmpByMan();
+                break;
+
             case 'Update an employee\'s role':
+                // getEmployee();
                 updateEmployeeRole();
+                // getEmployee(updateEmployeeRole);
                 break;
 
             default:
@@ -108,18 +120,107 @@ const viewEmployees = () => {
     });
 };
 
+const viewEmpByDep = () => {
+    inquirer.prompt({
+        name: 'department',
+        type: 'list',
+        message: 'Please choose a department',
+        choices: [
+            'Engineering',
+            'Human Resources',
+            'Management Team'
+        ]
+    }).then((answer) => {
+        console.log("Employees viewed by department!");
+        let query = 'SELECT employee.id, CONCAT(employee.first_name, " ", employee.last_name) AS employee, role.title FROM employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id WHERE department.name=?;';
+        connection.query(query, [answer.department], (err, res) => {
+            if (err) throw err;
+
+            console.table(res);
+
+            start();
+        });
+    });
+};
+
+const viewEmpByMan = () => {
+    // console.log("Employees viewed by manager!");
+    // let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id LEFT JOIN employee AS manager ON employee.manager_id=manager.id;';
+    // connection.query(query, (err, res) => {
+    //     if (err) throw err;
+
+    //     console.table(res);
+
+    start();
+    // });
+};
+
+
+// const getEmployee = (other) => {
+
+//     let query = 'SELECT CONCAT(employee.first_name, " ", employee.last_name) AS employee FROM employee;';
+//     let choicesE = [];
+
+//     connection.query(query, (err, res) => {
+//         if (err) throw err;
+//         choices = res.map(a => a.employee);
+//         // console.log(choices);
+//         choicesE.push(choices);
+//         return choicesE;
+//     });
+//     other(choicesE);
+// };
+
+
+
+// const getEmployee = () => {
+//     let total;
+//     let query = 'SELECT CONCAT(employee.first_name, " ", employee.last_name) AS employee FROM employee;';
+//     // let choicesE = [];
+//     connection.query(query, (err, res) => {
+//         if (err) throw err;
+//         // console.log(res);
+//         // choicesE = res;
+//         let total = res;
+//         // let total = choicesE.push(res);
+//         console.log(total);
+//         // console.log(choicesE);
+//         // return choicesE;
+//         return total;
+//     });
+//     updateEmployeeRole(total);
+// };
+
 const updateEmployeeRole = () => {
+
+    // console.log(choicesE);
+    // getEmployee(choicesE);
+    // let choicesE = [{ employee: 'Sarah' }, { employee: 'John' }];
+    // console.log(choicesE);
+    // let result = Array.prototype.map.call(choicesE, function (obj) {
+    //     return obj.value
+    // })
+    //Array.from(choicesE, mapFn);
+    //choicesE.map(a => a.employee);
+    // console.log(result);
+
+
+
+    // console.log(choicesE);
+
     inquirer.prompt([
         {
             name: 'chooseEmployee',
             type: 'list',
             message: 'Which employee would you like to update?',
-            choices: [
-                '1',
-                '2',
-                '3',
-                '4'
-            ],
+            choices: //total.map(a => a.employee)
+                [
+                    '1',
+                    '2',
+                    '3',
+                    '4'
+                ]
+            ,
         },
         {
             name: 'newrole',
