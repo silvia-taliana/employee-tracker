@@ -43,6 +43,7 @@ const start = () => {
             'Update an employee\'s role',
             'Update an employee\s manager',
             'Delete a department',
+            'Delete a role',
             'Exit application'
         ]
     }).then((answer) => {
@@ -93,6 +94,10 @@ const start = () => {
 
             case 'Delete a department':
                 chooseDep();
+                break;
+
+            case 'Delete a role':
+                chooseRole();
                 break;
 
             case 'Exit application':
@@ -314,7 +319,11 @@ const viewRoles = () => {
     let query = 'SELECT title AS Title FROM role;';
     connection.query(query, (err, res) => {
         if (err) throw err;
-
+        // Removing duplicate role ids from the array
+        function removeDuplicates(data) {
+            return data.filter((value, index) => data.indexOf(value) === index);
+        }
+        res = removeDuplicates(res);
         console.table(res);
 
         start();
@@ -327,7 +336,11 @@ const viewDepartments = () => {
     let query = 'SELECT name AS Department FROM department;';
     connection.query(query, (err, res) => {
         if (err) throw err;
-
+        // Removing duplicate role ids from the array
+        function removeDuplicates(data) {
+            return data.filter((value, index) => data.indexOf(value) === index);
+        }
+        res = removeDuplicates(res);
         console.table(res);
 
         start();
@@ -613,7 +626,6 @@ const getDepIdDel = (choicesN) => {
         let query = 'SELECT id FROM department WHERE name="' + dep + '";';
         connection.query(query, (err, res) => {
             if (err) throw err;
-            console.log(res);
             let depId = res.map(a => a.id); // reading object values and saving in an array
             // Removing duplicate department ids from the array
             function removeDuplicates(data) {
@@ -631,6 +643,52 @@ const deleteDep = (depId) => {
     connection.query(query, (err, res) => {
         if (err) throw err;
         console.log("Department has been deleted");
+        start();
+    });
+};
+
+// The next few functions allow user to delete a role
+// Getting all roles
+const chooseRole = () => {
+    let query = 'SELECT title FROM role;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let choicesT = res.map(a => a.title); // reading object values and saving in an array
+        // Removing duplicate role ids from the array
+        function removeDuplicates(data) {
+            return data.filter((value, index) => data.indexOf(value) === index);
+        }
+        choicesT = removeDuplicates(choicesT);
+        getRoleIdDel(choicesT);
+    });
+};
+
+// Prompting user to choose role
+const getRoleIdDel = (choicesT) => {
+    inquirer.prompt({
+        name: 'title',
+        type: 'list',
+        message: 'Which role would you like to delete?',
+        choices: choicesT
+    }).then((answer) => {
+        // Getting id of chosen role
+        let role = answer.title;
+        let query = 'SELECT id FROM role WHERE title="' + role + '";';
+        connection.query(query, (err, res) => {
+            if (err) throw err;
+            let roleId = res.map(a => a.id); // reading object values and saving in an array
+            deleteRole(roleId);
+        });
+    });
+};
+
+// Deleting role
+const deleteRole = (roleId) => {
+    let query = 'DELETE FROM role WHERE role.id =' + roleId + ';';
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        console.log("Role has been deleted");
         start();
     });
 };
