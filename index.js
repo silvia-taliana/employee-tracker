@@ -45,6 +45,7 @@ const start = () => {
             'Delete a department',
             'Delete a role',
             'Delete an employee',
+            'View total utilized budget by department',
             'Exit application'
         ]
     }).then((answer) => {
@@ -103,6 +104,10 @@ const start = () => {
 
             case 'Delete an employee':
                 chooseEmp();
+                break;
+
+            case 'View total utilized budget by department':
+                getBudget();
                 break;
 
             case 'Exit application':
@@ -735,6 +740,46 @@ const deleteEmployee = (empId) => {
     connection.query(query, (err, res) => {
         if (err) throw err;
         console.log("Employee has been deleted");
+        start();
+    });
+};
+
+// The next few functions allow the user to view the total utilized budget for a chosen department
+// Getting departments
+const getBudget = () => {
+    let query = 'SELECT name FROM department;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let choicesN = res.map(a => a.name); // reading object values and saving in an array
+        getDepIdBudg(choicesN);
+    });
+};
+
+// Prompting user to choose department and getting id number for chosen department
+const getDepIdBudg = (choicesN) => {
+    inquirer.prompt({
+        name: 'department',
+        type: 'list',
+        message: 'Which department\'s budget would you like to view?',
+        choices: choicesN
+    }).then((answer) => {
+        let depName = answer.department;
+        let query = 'SELECT id FROM department WHERE name="' + depName + '";';
+        connection.query(query, (err, res) => {
+            if (err) throw err;
+            let depIdBudg = res.map(a => a.id); // reading object values and saving in an array
+            viewBudget(depIdBudg);
+        });
+    });
+};
+
+// Viewing budget for chosen department
+const viewBudget = (depIdBudg) => {
+    let query = 'SELECT SUM(salary) AS "Total Utilized Budget" FROM role WHERE department_id=' + depIdBudg + ';';
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        console.table(res);
         start();
     });
 };

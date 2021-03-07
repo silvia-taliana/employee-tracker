@@ -1,6 +1,9 @@
 INSERT INTO employee (id, first_name, last_name, role_id, manager_id)
 VALUES (1, "Stevie", "Nicks", 101, 2); 
 
+INSERT INTO employee (id, first_name, last_name, role_id, manager_id)
+VALUES (5, "Freddy", "Mercury", 101, 2); 
+
 INSERT INTO role (id, title, salary, department_id)
 VALUES (101, "Software Engineer", 150000, 201);
 
