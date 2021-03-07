@@ -40,7 +40,8 @@ const start = () => {
             'View employees by department',
             'View employees by role',
             'View employees by manager',
-            'Update an employee\'s role'
+            'Update an employee\'s role',
+            'Exit application'
         ]
     }).then((answer) => {
         switch (answer.action) {
@@ -77,11 +78,15 @@ const start = () => {
                 break;
 
             case 'View employees by manager':
-                viewEmpByMan();
+                managers();
                 break;
 
             case 'Update an employee\'s role':
                 getEmployee();
+                break;
+
+            case 'Exit application':
+                connection.end();
                 break;
 
             default:
@@ -400,17 +405,47 @@ const viewEmpByRole = (choicesT) => {
     });
 };
 
+//The next few functions will allow user to view employee by manager
+// Getting list of managers
+const managers = () => {
+    let query = 'SELECT CONCAT(employee.first_name, " ", employee.last_name) AS manager FROM employee;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let choicesMan = res.map(a => a.manager); // reading object values and saving in an array
+        managerId(choicesMan);
+    });
+};
+
+// Getting the manager's ID number
+const managerId = (choicesMan) => {
+    inquirer.prompt({
+        name: 'manager',
+        type: 'list',
+        message: 'Which manager would you like to choose?',
+        choices: choicesMan
+    }).then((answer) => {
+        let manager = answer.manager;
+        let query = 'SELECT employee.id FROM employee WHERE CONCAT(employee.first_name, " ", employee.last_name)="' + manager + '";';
+        connection.query(query, (err, res) => {
+            if (err) throw err;
+            let managerId = res.map(a => a.id);
+            viewEmpByMan(managerId);
+        });
+    });
+};
+
 // Function to view employee by manager
-const viewEmpByMan = () => {
-    // console.log("Employees viewed by manager!");
-    // let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id LEFT JOIN employee AS manager ON employee.manager_id=manager.id;';
-    // connection.query(query, (err, res) => {
-    //     if (err) throw err;
+const viewEmpByMan = (managerId) => {
+    console.log("Employees viewed by manager!");
+    let query = 'SELECT employee.id AS ID, CONCAT(employee.first_name, " ", employee.last_name) AS Employee, role.title AS Title FROM employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN employee AS manager ON employee.manager_id=manager.id WHERE manager.id=' + managerId + ';';
+    connection.query(query, (err, res) => {
+        if (err) throw err;
 
-    //     console.table(res);
+        console.table(res);
 
-    start();
-    // });
+        start();
+    });
 };
 
 // The next few functions are for updating an employee's role
