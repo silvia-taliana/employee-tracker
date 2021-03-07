@@ -44,6 +44,7 @@ const start = () => {
             'Update an employee\s manager',
             'Delete a department',
             'Delete a role',
+            'Delete an employee',
             'Exit application'
         ]
     }).then((answer) => {
@@ -98,6 +99,10 @@ const start = () => {
 
             case 'Delete a role':
                 chooseRole();
+                break;
+
+            case 'Delete an employee':
+                chooseEmp();
                 break;
 
             case 'Exit application':
@@ -689,6 +694,47 @@ const deleteRole = (roleId) => {
     connection.query(query, (err, res) => {
         if (err) throw err;
         console.log("Role has been deleted");
+        start();
+    });
+};
+
+// The next few functions allow user to delete an employee
+// Getting all employees
+const chooseEmp = () => {
+    let query = 'SELECT CONCAT(employee.first_name, " ", employee.last_name) AS employee FROM employee;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let choicesE = res.map(a => a.employee); // reading object values and saving in an array
+        getEmpId(choicesE);
+    });
+};
+
+// Prompting user to choose employee
+const getEmpId = (choicesE) => {
+    inquirer.prompt({
+        name: 'employee',
+        type: 'list',
+        message: 'Which employee would you like to delete?',
+        choices: choicesE
+    }).then((answer) => {
+        // Getting id of chosen employee
+        let name = answer.employee;
+        let query = 'SELECT id FROM employee WHERE CONCAT(employee.first_name, " ", employee.last_name)="' + name + '";';
+        connection.query(query, (err, res) => {
+            if (err) throw err;
+            let empId = res.map(a => a.id); // reading object values and saving in an array
+            deleteEmployee(empId);
+        });
+    });
+};
+
+// Deleting employee
+const deleteEmployee = (empId) => {
+    let query = 'DELETE FROM employee WHERE employee.id =' + empId + ';';
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        console.log("Employee has been deleted");
         start();
     });
 };
