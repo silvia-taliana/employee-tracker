@@ -41,6 +41,7 @@ const start = () => {
             'View employees by role',
             'View employees by manager',
             'Update an employee\'s role',
+            'Update an employee\s manager',
             'Exit application'
         ]
     }).then((answer) => {
@@ -83,6 +84,10 @@ const start = () => {
 
             case 'Update an employee\'s role':
                 getEmployee();
+                break;
+
+            case 'Update an employee\s manager':
+                chooseEmployee();
                 break;
 
             case 'Exit application':
@@ -525,6 +530,55 @@ const updateRole = (answer, newSalary, updDep) => {
     connection.query(query, [answer.newrole, answer.chooseEmployee], (err, res) => {
         if (err) throw err;
         console.log("Employee role updated!");
+        start();
+    });
+};
+
+// The next few functions allow user to update the employee's manager
+// selecting all employees in the database
+const chooseEmployee = () => {
+    let query = 'SELECT CONCAT(employee.first_name, " ", employee.last_name) AS employee FROM employee;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let choicesE = res.map(a => a.employee); // reading object values and saving in an array
+        chooseManager(choicesE);
+    });
+};
+
+// Choosing which employee to update and new manager
+const chooseManager = (choicesE) => {
+    inquirer.prompt([
+        {
+            name: 'employee',
+            type: 'list',
+            message: 'Which employee would you like to update?',
+            choices: choicesE,
+        },
+        {
+            name: 'manager',
+            type: 'list',
+            message: 'Please choose a new manager for this employee',
+            choices: choicesE,
+        }]).then((answer) => {
+            // getting manager's ID number
+            let manager = answer.manager;
+            let employee = answer.employee;
+            let query = 'SELECT employee.id FROM employee WHERE CONCAT(employee.first_name, " ", employee.last_name)="' + manager + '";';
+            connection.query(query, (err, res) => {
+                if (err) throw err;
+                let managerId = res.map(a => a.id);
+                updateManager(employee, managerId);
+            });
+        });
+};
+
+// Updating manager 
+const updateManager = (employee, managerId) => {
+    let query = 'UPDATE employee SET employee.manager_id=' + managerId + ' WHERE CONCAT(employee.first_name, " ", employee.last_name)="' + employee + '";';
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        console.log("Employee's manager has been updated");
         start();
     });
 };
