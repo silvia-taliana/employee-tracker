@@ -42,6 +42,7 @@ const start = () => {
             'View employees by manager',
             'Update an employee\'s role',
             'Update an employee\s manager',
+            'Delete a department',
             'Exit application'
         ]
     }).then((answer) => {
@@ -88,6 +89,10 @@ const start = () => {
 
             case 'Update an employee\s manager':
                 chooseEmployee();
+                break;
+
+            case 'Delete a department':
+                chooseDep();
                 break;
 
             case 'Exit application':
@@ -579,6 +584,53 @@ const updateManager = (employee, managerId) => {
     connection.query(query, (err, res) => {
         if (err) throw err;
         console.log("Employee's manager has been updated");
+        start();
+    });
+};
+
+// The next few functions allow user to delete a department
+// Getting all department names
+const chooseDep = () => {
+    let query = 'SELECT name FROM department;';
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let choicesN = res.map(a => a.name); // reading object values and saving in an array
+        getDepIdDel(choicesN);
+    });
+};
+
+// Prompting user to choose department
+const getDepIdDel = (choicesN) => {
+    inquirer.prompt({
+        name: 'department',
+        type: 'list',
+        message: 'Which department would you like to delete?',
+        choices: choicesN
+    }).then((answer) => {
+        // Getting id of chosen department
+        let dep = answer.department;
+        let query = 'SELECT id FROM department WHERE name="' + dep + '";';
+        connection.query(query, (err, res) => {
+            if (err) throw err;
+            console.log(res);
+            let depId = res.map(a => a.id); // reading object values and saving in an array
+            // Removing duplicate department ids from the array
+            function removeDuplicates(data) {
+                return data.filter((value, index) => data.indexOf(value) === index);
+            }
+            depId = removeDuplicates(depId);
+            deleteDep(depId);
+        });
+    });
+};
+
+// Deleting department
+const deleteDep = (depId) => {
+    let query = 'DELETE FROM department WHERE department.id =' + depId + ';';
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        console.log("Department has been deleted");
         start();
     });
 };
