@@ -17,7 +17,7 @@ department_id INT NULL,
 PRIMARY KEY (id),
 FOREIGN KEY (department_id) REFERENCES department(id)
 	ON UPDATE CASCADE
-	ON DELETE CASCADE
+	ON DELETE SET NULL
 );
 
 CREATE TABLE employee (
@@ -29,10 +29,10 @@ manager_id INT NULL,
 PRIMARY KEY (id),
 FOREIGN KEY (manager_id) REFERENCES employee(id)
 	ON UPDATE CASCADE
-	ON DELETE CASCADE,
+	ON DELETE SET NULL,
 FOREIGN KEY (role_id) REFERENCES role(id)
 	ON UPDATE CASCADE
-	ON DELETE CASCADE
+	ON DELETE SET NULL
 );
 
 -- view all employees
