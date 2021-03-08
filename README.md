@@ -3,7 +3,7 @@
 ![badge](https://img.shields.io/badge/License-MIT-Green)
 
 ## Description
-The aim of this project was to create a command line application that allows employers to view and alter their employee's details with ease. The employee's details are stored in a database using MySQL and the application is run using node.js. To see how the application works, click to view a video [demonstration]().
+The aim of this project was to create a command line application that allows employers to view and alter their employee's details with ease. The employee's details are stored in a database using MySQL and the application is run using node.js. To see how the application works, click to view a video [demonstration](https://drive.google.com/file/d/1LDyILeohtpN0Hqt7saTsXdz5xN89tviS/view).
 
 ## Table of Contents 
 
