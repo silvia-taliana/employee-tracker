@@ -142,7 +142,6 @@ const getNewTitle = () => {
 // selecting all employees in the database for management assignment
 const getNewMan = (choicesT) => {
     let query = 'SELECT CONCAT(first_name, " ", last_name) AS Manager FROM employee;';
-
     connection.query(query, (err, res) => {
         if (err) throw err;
         let choicesM = res.map(a => a.Manager); // reading object values and saving in an array
@@ -188,6 +187,12 @@ const getNewId = (answer) => {
     connection.query(query, (err, res) => {
         if (err) throw err;
         let newId = res.map(a => a.id); // reading object values and saving in an array
+
+        function sortNumbers(a, b) {
+            return a - b;
+        }
+        newId.sort(sortNumbers); // sorting ID numbers into order from smalles to largest
+
         const lastItem = newId[newId.length - 1];
         newId = lastItem + 1;
         getNewRoleId(answer, newId);
@@ -274,6 +279,12 @@ const getRoleId = (answer, depId) => {
     connection.query(query, (err, res) => {
         if (err) throw err;
         let newRoleId = res.map(a => a.id); // reading object values and saving in an array
+
+        function sortNumbers(a, b) {
+            return a - b;
+        }
+        newRoleId.sort(sortNumbers); // sorting ID numbers into order from smalles to largest
+
         const lastItem = newRoleId[newRoleId.length - 1];
         newRoleId = lastItem + 1;
         generateNewRole(answer, depId, newRoleId);
@@ -298,6 +309,11 @@ const getDepId = () => {
     connection.query(query, (err, res) => {
         if (err) throw err;
         let newDepId = res.map(a => a.id); // reading object values and saving in an array
+        function sortNumbers(a, b) {
+            return a - b;
+        }
+        newDepId.sort(sortNumbers); // sorting ID numbers into order from smalles to largest
+
         const lastItem = newDepId[newDepId.length - 1];
         newDepId = lastItem + 1;
         addDepartment(newDepId);
