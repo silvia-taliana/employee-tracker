@@ -536,42 +536,36 @@ const updateEmployeeRole = (choicesE, choicesR) => {
             choices: choicesR
         }
     ]).then((answer) => {
-        getSalary(answer);
-    });
-};
-
-// Getting a salary for the chosen role 
-const getSalary = (answer) => {
-    let query = 'SELECT salary FROM role WHERE title=?;';
-
-    connection.query(query, [answer.newrole], (err, res) => {
-        if (err) throw err;
-        let newSalary = res.map(a => a.salary); // reading object values and saving in an array
         let newR = answer.newrole;
-        getDep(answer, newSalary, newR);
+        let chosenEmpl = answer.chooseEmployee;
+        gettingRole(newR, chosenEmpl);
     });
 };
 
-// Getting the department for the chosen role
-const getDep = (answer, newSalary, newR) => {
-    let query = 'SELECT department_id FROM role WHERE title="' + newR + '";';
+// Getting the role id for the chosen role
+const gettingRole = (newR, chosenEmpl) => {
+    let query = 'SELECT role.id FROM role WHERE title="' + newR + '";';
     connection.query(query, (err, res) => {
         if (err) throw err;
-        console.log(res);
-        let updDep = res.map(a => a.department_id); // reading object values and saving in an array
-        // Removing duplicate roles from the database
-        function removeDuplicates(data) {
-            return data.filter((value, index) => data.indexOf(value) === index);
-        }
-        updDep = removeDuplicates(updDep);
-        updateRole(answer, newSalary, updDep);
+        let newRId = res.map(a => a.id);
+        gettingEmpId(newRId, chosenEmpl);
+    });
+};
+
+// Getting the employee id for the chosen employee
+const gettingEmpId = (newRId, chosenEmpl) => {
+    let query = 'SELECT employee.id FROM employee WHERE CONCAT(employee.first_name, " ", employee.last_name)="' + chosenEmpl + '";';
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        let newEId = res.map(a => a.id);
+        updateRole(newRId, newEId);
     });
 };
 
 // Putting all the elements together to update role 
-const updateRole = (answer, newSalary, updDep) => {
-    const query = 'UPDATE employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id LEFT JOIN employee AS manager ON employee.manager_id=manager.id SET role.title=?, role.salary=' + newSalary + ', role.department_id=' + updDep + ' WHERE CONCAT(employee.first_name, " ", employee.last_name)=?;';
-    connection.query(query, [answer.newrole, answer.chooseEmployee], (err, res) => {
+const updateRole = (newRId, newEId) => {
+    const query = 'UPDATE employee LEFT JOIN role ON role.id=employee.role_id LEFT JOIN department ON role.department_id=department.id SET employee.role_id=' + newRId + ' WHERE employee.id=' + newEId + ';';
+    connection.query(query, (err, res) => {
         if (err) throw err;
         console.log("Employee role updated!");
         start();
